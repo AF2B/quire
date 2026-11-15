@@ -13,6 +13,10 @@ with CSS classes by the code-blocks extension.
 MARKDOWN: the Markdown source string."
   (check-type markdown string)
   (with-output-to-string (out)
+    ;; The highlighter (colorize) prints progress chatter ("Scan was called N
+    ;; times", a missing HyperSpec map) on *TRACE-OUTPUT*, which is the terminal
+    ;; and would pollute the output of the command line.
     (let ((3bmd-tables:*tables* t)
-          (3bmd-code-blocks:*code-blocks* t))
+          (3bmd-code-blocks:*code-blocks* t)
+          (*trace-output* (make-broadcast-stream)))
       (3bmd:parse-string-and-print-to-stream markdown out))))
