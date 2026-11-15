@@ -1,0 +1,380 @@
+/*
+ * Borba theme for quire. Follows the Borba Design System (tipografia.md):
+ * midnight background, white text, 1px #333 borders, radius 0, no shadows,
+ * no gradients, Inter / JetBrains Mono / Playfair Display. Values come from
+ * tokens.css; never hard-code a new palette entry here.
+ */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono.ttf") format("truetype");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  src: url("../fonts/PlayfairDisplay.ttf") format("truetype");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.125rem;
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  line-height: 1.7;
+}
+
+main {
+  flex: 1;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+a {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--accent));
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.5rem 1rem;
+}
+
+/* Labels: mono, uppercase, wide tracking. */
+.label,
+.site-header nav a,
+.site-footer,
+time,
+.tags a {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.label,
+time {
+  color: hsl(var(--secondary));
+}
+
+/* Header: the only translucent surface. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(0, 5, 16, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.site-header .bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.dot {
+  color: hsl(var(--accent));
+}
+
+.site-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.site-header nav a {
+  color: hsl(var(--secondary));
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+}
+
+.site-header nav a:hover,
+.site-header nav a[aria-current] {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Headings. */
+h1, h2, h3, h4 {
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 3rem 0 1.5rem;
+}
+
+h2 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin: 3rem 0 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+}
+
+/* Posts: the editorial serif is reserved for post titles. */
+.post-title {
+  font-family: var(--font-serif);
+  font-weight: 900;
+}
+
+.hero {
+  padding: 4rem 0 2rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 12vw, 7rem);
+  letter-spacing: -0.05em;
+  margin: 0.5rem 0 1rem;
+}
+
+.hero .lead {
+  color: hsl(var(--secondary));
+  font-size: 1.25rem;
+  max-width: 36rem;
+}
+
+/* Lists of pages. */
+.entries {
+  list-style: none;
+  margin: 2rem 0;
+  padding: 0;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.entries li {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.25rem 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.entries .title {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.entries .summary {
+  grid-column: 2;
+  color: hsl(var(--secondary));
+  margin: 0;
+}
+
+@media (max-width: 36rem) {
+  .entries li {
+    grid-template-columns: 1fr;
+  }
+
+  .entries .summary {
+    grid-column: 1;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.tags a {
+  display: inline-block;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--accent));
+  padding: 0.125rem 0.5rem;
+  text-decoration: none;
+}
+
+.tags a:hover {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Prose. */
+article p,
+article li {
+  max-width: 42rem;
+}
+
+blockquote {
+  margin: 1.5rem 0;
+  padding: 0 1.5rem;
+  border-left: 1px solid hsl(var(--accent));
+  color: hsl(var(--secondary));
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+  margin: 3rem 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 1rem;
+}
+
+th, td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+th {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: hsl(var(--secondary));
+}
+
+/* Code: terminal black with Electric Blue text. */
+code, pre {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+}
+
+code {
+  background: var(--terminal-bg);
+  color: hsl(var(--accent));
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background: var(--terminal-bg);
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--accent));
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Classes emitted by the code-blocks extension (colorize). */
+pre .comment,
+pre [class^="paren"] {
+  color: hsl(var(--secondary));
+}
+
+pre .keyword,
+pre .special,
+pre .string,
+pre .character {
+  color: hsl(var(--foreground));
+}
+
+pre .special,
+pre .keyword {
+  font-weight: 600;
+}
+
+/* Footer. */
+.site-footer {
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--secondary));
+  margin-top: 4rem;
+  padding: 1.5rem 0;
+}
+
+.site-footer a {
+  color: hsl(var(--secondary));
+}
+
+@media print {
+  .site-header, .site-footer { display: none; }
+}

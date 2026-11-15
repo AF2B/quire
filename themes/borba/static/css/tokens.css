@@ -1,0 +1,30 @@
+/* Borba Design System — tokens. Source of truth: tipografia.md */
+:root {
+  --background: 220 100% 3%;
+  --foreground: 0 0% 100%;
+  --card: 220 100% 3%;
+  --card-foreground: 0 0% 100%;
+  --popover: 220 100% 5%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 220 100% 3%;
+  --secondary: 204 13% 60%;
+  --secondary-foreground: 220 100% 3%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 204 13% 60%;
+  --accent: 208 100% 43%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 208 100% 43%;
+  --radius: 0rem;
+
+  --status-ok: #22c55e;
+  --terminal-bg: #000000;
+
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", "Roboto Mono", monospace;
+  --font-serif: "Playfair Display", serif;
+}
