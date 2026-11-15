@@ -15,7 +15,9 @@ server: redefine a layout and the browser reloads.
 - Default theme built on the Borba Design System (the generator itself is
   theme-agnostic)
 
-Status: `0.1.0`. SBCL only. License: not chosen yet.
+Status: `0.1.0`, a public preview: the API may still change before 1.0.
+SBCL only. License: MIT (see `LICENSE`); the bundled fonts are under the SIL
+Open Font License (see `NOTICE.md`). Changes are listed in `CHANGELOG.md`.
 
 ## Quick start
 
