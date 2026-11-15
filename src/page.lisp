@@ -7,7 +7,9 @@
            #:page-body
            #:page-metadata
            #:page-path
-           #:page-source))
+           #:page-source
+           #:resolve-body
+           #:copy-page))
 
 (in-package #:quire/page)
 
@@ -72,3 +74,31 @@ SOURCE: string or pathname of the origin, or NIL."
                  :body body
                  :metadata metadata
                  :source source))
+
+(defun copy-page (page &key (path (page-path page))
+                            (body (page-body page))
+                            (metadata (page-metadata page))
+                            (source (page-source page)))
+  "Return a new page like PAGE, with the given slots replaced.
+
+PAGE: the page to copy.
+PATH: replacement URL path; defaults to the path of PAGE.
+BODY: replacement body; defaults to the body of PAGE.
+METADATA: replacement property list; defaults to the metadata of PAGE.
+SOURCE: replacement source; defaults to the source of PAGE."
+  (make-page :path path :body body :metadata metadata :source source))
+
+(defun resolve-body (page)
+  "Return the body of PAGE as a string or a vector of bytes.
+
+A function body is called with PAGE; its result must be a string or bytes.
+Calling happens on every use, so a function redefined at the REPL takes effect
+on the next call.
+
+PAGE: the page whose body to resolve."
+  (let ((body (page-body page)))
+    (if (functionp body)
+        (let ((result (funcall body page)))
+          (check-type result (or string octets))
+          result)
+        body)))
