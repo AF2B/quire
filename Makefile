@@ -23,7 +23,13 @@ STRICT := --eval '(progn \
 	(error "Build not clean: ~A" w))))) \
 	(asdf:load-system "quire/tests" :force (list "quire/tests"))))'
 
-.PHONY: build test repl clean sync-design binary
+.PHONY: build test repl clean sync-design binary deps
+
+# Installs the third-party dependencies through Quicklisp (needed on a fresh
+# machine, such as the CI runner).
+deps:
+	sbcl --noinform --non-interactive \
+		--eval '(ql:quickload (quote ($(DEPENDENCIES))) :silent t)'
 
 build:
 	sbcl --noinform --non-interactive $(REGISTER) $(STRICT)

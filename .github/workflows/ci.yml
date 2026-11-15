@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build, test and smoke-test the executable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install SBCL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sbcl curl
+          sbcl --version
+
+      - name: Install Quicklisp
+        run: |
+          curl -fsSL https://beta.quicklisp.org/quicklisp.lisp -o /tmp/quicklisp.lisp
+          sbcl --noinform --non-interactive \
+            --load /tmp/quicklisp.lisp \
+            --eval '(quicklisp-quickstart:install)' \
+            --eval '(ql-util:without-prompting (ql:add-to-init-file))'
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Strict build and test suite
+        run: make test
+
+      - name: Build the executable
+        run: make binary
+
+      - name: Build the demo site twice and compare
+        run: |
+          bin/quire version
+          bin/quire build --site examples/demo/site.lisp --out /tmp/site-a
+          bin/quire build --site examples/demo/site.lisp --out /tmp/site-b
+          diff -r /tmp/site-a /tmp/site-b
