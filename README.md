@@ -2,6 +2,7 @@
 
 **Pages are functions. Sites are data.**
 
+[![CI](https://github.com/AF2B/quire/actions/workflows/ci.yml/badge.svg)](https://github.com/AF2B/quire/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/AF2B/quire?include_prereleases&label=release&color=0074D9)](https://github.com/AF2B/quire/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0074D9)](LICENSE)
 [![Common Lisp](https://img.shields.io/badge/Common%20Lisp-SBCL-0074D9)](https://www.sbcl.org/)
