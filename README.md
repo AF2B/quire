@@ -1,5 +1,12 @@
 # quire
 
+**Pages are functions. Sites are data.**
+
+[![Release](https://img.shields.io/github/v/release/AF2B/quire?include_prereleases&label=release&color=0074D9)](https://github.com/AF2B/quire/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0074D9)](LICENSE)
+[![Common Lisp](https://img.shields.io/badge/Common%20Lisp-SBCL-0074D9)](https://www.sbcl.org/)
+[![Status: preview](https://img.shields.io/badge/status-preview-333333)](CHANGELOG.md)
+
 A static site generator in Common Lisp. Content is **data**, pages are
 **functions**, HTML is written as S-expressions, and the REPL is the dev
 server: redefine a layout and the browser reloads.
