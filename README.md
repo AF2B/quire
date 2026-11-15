@@ -26,6 +26,10 @@ Status: `0.1.0`, a public preview: the API may still change before 1.0.
 SBCL only. License: MIT (see `LICENSE`); the bundled fonts are under the SIL
 Open Font License (see `NOTICE.md`). Changes are listed in `CHANGELOG.md`.
 
+![The demo site: home page](docs/screenshot-home.jpg)
+
+![The demo site: a post with highlighted Lisp code](docs/screenshot-post.jpg)
+
 ## Quick start
 
 Requirements: SBCL, ASDF, Quicklisp.
@@ -109,6 +113,41 @@ A build is a list of steps `(page-map site) -> page-map`, run in order. The
 defaults are `add-section-indexes`, `add-tag-pages`, `add-feed`, `add-sitemap`
 and `apply-layouts` (always last). Add your own anywhere before it.
 
+## HTML output
+
+The pages quire writes are plain, modern HTML5:
+
+- `<!doctype html>`, a `lang` attribute, a viewport meta tag and a UTF-8
+  charset
+- Semantic landmarks (`header`, `nav`, `main`, `article`, `footer`), a skip
+  link, `aria-current` on the active navigation entry and `<time datetime>`
+  for dates
+- An RSS alternate link when the site has dated pages
+- Text and attributes escaped by default
+
+You write layouts with [Spinneret](https://github.com/ruricolist/spinneret), so
+HTML is S-expressions and any HTML5 element is available:
+
+```lisp
+(spinneret:with-html-string
+  (:article
+   (:header (:h1 "Title") (:time :datetime "2026-11-14" "14 Nov 2026"))
+   (:figure (:picture (:source :srcset "a.webp" :type "image/webp")
+                      (:img :src "a.png" :alt "A diagram"))
+            (:figcaption "A diagram"))
+   (:details (:summary "More") (:p "Hidden until opened."))
+   (:dialog :open t (:p "Hello"))))
+```
+
+The test suite renders more than thirty elements, among them `article`,
+`aside`, `audio`, `details`, `dialog`, `figure`, `hgroup`, `mark`, `meter`,
+`nav`, `picture`, `progress`, `ruby`, `section`, `summary`, `template`, `time`
+and `video`. Spinneret has no `<search>` or `<slot>` element; write those with
+`(:raw "<search>...</search>")`.
+
+In Markdown content, raw HTML passes through unchanged, so `<details>`,
+`<picture>`, `<video>` and the rest work there too.
+
 ## REPL-driven development
 
 ```lisp
@@ -161,8 +200,13 @@ build.
 make build         # strict build: any WARNING or STYLE-WARNING fails it
 make test          # strict build, then the FiveAM suite
 make binary        # bin/quire
+make deps          # install third-party dependencies through Quicklisp
 make sync-design   # re-copy tokens.css and fonts from ~/Documents/borba-design-system
 ```
+
+Every push and pull request runs the strict build, the suite, builds the
+executable and builds the demo site twice to check that the output is identical
+(see `.github/workflows/ci.yml`).
 
 Systems: `quire` (core), `quire/theme-borba`, `quire/server`, `quire/cli`,
 `quire/tests`. One package per file, exported symbols only.
