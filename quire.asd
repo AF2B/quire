@@ -1,6 +1,8 @@
 (asdf:defsystem "quire"
   :description "Static site generator: pages as functions, sites as data."
   :version "0.1.0"
+  :author "André Borba"
+  :license "MIT"
   :serial t
   :depends-on ("3bmd"
                "3bmd-ext-code-blocks"
@@ -29,6 +31,8 @@
 (asdf:defsystem "quire/theme-borba"
   :description "Default theme for quire, built on the Borba Design System."
   :version "0.1.0"
+  :author "André Borba"
+  :license "MIT"
   :pathname "themes/borba/"
   :serial t
   :depends-on ("alexandria"
@@ -40,6 +44,8 @@
 (asdf:defsystem "quire/server"
   :description "Development server for quire with live reload."
   :version "0.1.0"
+  :author "André Borba"
+  :license "MIT"
   :pathname "server/"
   :serial t
   :depends-on ("alexandria"
@@ -52,6 +58,8 @@
 (asdf:defsystem "quire/cli"
   :description "Command line interface and executable entry point of quire."
   :version "0.1.0"
+  :author "André Borba"
+  :license "MIT"
   :pathname "cli/"
   :serial t
   :depends-on ("alexandria"
