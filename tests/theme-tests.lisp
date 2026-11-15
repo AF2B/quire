@@ -48,12 +48,13 @@
    (read-file-text (merge-pathnames "css/quire-borba.css"
                                     (static-directory)))))
 
-(defun themed-page-html (&key (base-url "") (path "x.md") front-matter)
+(defun themed-page-html (&key (base-url "") (path "x.md") front-matter nav)
   "Build a one-page site and return the HTML of its page.
 
 BASE-URL: public address of the site.
 PATH: content file name.
-FRONT-MATTER: the sexp between the fences, as a string."
+FRONT-MATTER: the sexp between the fences, as a string.
+NAV: navigation entries as (LABEL . PATH) conses, or NIL for the default."
   (with-temp-directory (root)
     (write-text-file root (concatenate 'string "content/" path)
                      (format nil "---~%~A~%---~%Body <b>text</b>"
@@ -63,7 +64,8 @@ FRONT-MATTER: the sexp between the fences, as a string."
                                            :base-url base-url
                                            :root root
                                            :layouts (layouts)
-                                           :steps (steps)))))
+                                           :steps (steps)
+                                           :extra (and nav (list :nav nav))))))
       (resolve-body (find-page page-map "/x/")))))
 
 (test document-is-a-complete-html5-page
@@ -79,6 +81,27 @@ FRONT-MATTER: the sexp between the fences, as a string."
   (let ((html (themed-page-html :base-url "https://example.com/blog")))
     (is-true (search "/blog/css/tokens.css" html))
     (is-true (search "/blog/css/quire-borba.css" html))))
+
+(test layouts-written-with-spinneret-can-use-modern-html-elements
+  (dolist (tag '(:article :aside :audio :canvas :data :datalist :details
+                 :dialog :figcaption :figure :footer :header :hgroup :main
+                 :mark :menu :meter :nav :output :picture :progress :rp :rt
+                 :ruby :section :source :summary :template :time :track
+                 :video :wbr))
+    (let ((html (eval `(spinneret:with-html-string (,tag "x")))))
+      (is-true (search (format nil "<~(~A~)" tag) html)
+               "~A should render" tag))))
+
+(test output-uses-semantic-landmarks-and-accessibility-hooks
+  (let ((html (themed-page-html)))
+    (dolist (needle '("<header" "<nav aria-label=Primary" "<main id=main"
+                      "<article" "<footer" "class=skip"))
+      (is-true (search needle html) "~A should be in the page" needle))))
+
+(test navigation-marks-the-current-page
+  (let ((html (themed-page-html :nav '(("Home" . "/") ("This" . "/x/")))))
+    (is-true (search "aria-current=page>This" html))
+    (is-false (search "aria-current=page>Home" html))))
 
 (test theme-ships-the-design-system-files
   (let ((tokens (read-file-text (merge-pathnames "css/tokens.css"

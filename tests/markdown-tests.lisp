@@ -39,5 +39,13 @@
   (let ((html (markdown->html (format nil "| a | b |~%|---|---|~%| 1 | 2 |~%"))))
     (is-true (contains-p "<table" html))))
 
+(test raw-html5-elements-pass-through
+  (let ((html (markdown->html
+               (format nil "<details><summary>More</summary>text</details>~%~%~
+                            <picture><source srcset=\"a.webp\"><img src=\"a.png\"></picture>~%"))))
+    (is-true (contains-p "<details>" html))
+    (is-true (contains-p "<summary>More</summary>" html))
+    (is-true (contains-p "<picture>" html))))
+
 (test non-string-input-is-a-type-error
   (signals type-error (markdown->html nil)))
