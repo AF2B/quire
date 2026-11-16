@@ -45,3 +45,6 @@ jobs:
           bin/quire build --site examples/demo/site.lisp --out /tmp/site-a
           bin/quire build --site examples/demo/site.lisp --out /tmp/site-b
           diff -r /tmp/site-a /tmp/site-b
+
+      - name: Build the product site
+        run: bin/quire build --site site/site.lisp --out /tmp/product-site
