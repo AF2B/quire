@@ -6,6 +6,9 @@
                 #:format-iso-datetime)
   (:import-from #:quire/feed
                 #:+feed-item-limit+)
+  (:import-from #:quire/languages
+                #:language-codes
+                #:localize-path)
   (:import-from #:quire/page
                 #:make-page
                 #:page-body
@@ -22,6 +25,7 @@
   (:import-from #:quire/steps
                 #:dated-pages
                 #:newest-first
+                #:pages-in-language
                 #:with-added-pages)
   (:import-from #:quire/xml
                 #:xml-escape)
@@ -53,22 +57,23 @@ SITE: the site being built."
               (xml-escape (page-body page))))
     (format out "  </entry>~%")))
 
-(defun render-atom (entries site)
+(defun render-atom (entries site code)
   "Return the Atom 1.0 document, as a string, that lists ENTRIES.
 
 ENTRIES: dated pages, newest first.
-SITE: the site being built."
+SITE: the site being built.
+CODE: the language code of the feed."
   (with-output-to-string (out)
     (format out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>~%")
     (format out "<feed xmlns=\"http://www.w3.org/2005/Atom\" xml:lang=\"~A\">~%"
-            (xml-escape (site-language site)))
+            (xml-escape code))
     (format out "  <title>~A</title>~%" (xml-escape (site-title site)))
     (format out "  <subtitle>~A</subtitle>~%"
             (xml-escape (site-description site)))
     (format out "  <link href=\"~A\"/>~%" (xml-escape (site-url site "/")))
     (format out "  <link rel=\"self\" type=\"application/atom+xml\" ~
                  href=\"~A\"/>~%"
-            (xml-escape (site-url site +atom-path+)))
+            (xml-escape (site-url site (localize-path site code +atom-path+))))
     (format out "  <id>~A</id>~%" (xml-escape (site-url site "/")))
     (format out "  <updated>~A</updated>~%"
             (format-iso-datetime
@@ -82,22 +87,26 @@ SITE: the site being built."
 (defun add-atom-feed (page-map site)
   "Return PAGE-MAP plus an Atom 1.0 feed of its most recent dated pages.
 
-The feed lives at /atom.xml and lists as many pages as the RSS feed. The updated
+The feed of the default language lives at /atom.xml and each other language has
+its own below its prefix. It lists as many pages as the RSS feed. The updated
 date is the date of the newest entry, never the build time, so the output is
-deterministic. When no page is dated the map is returned unchanged. Run this
-before APPLY-LAYOUTS so the entry content is the rendered Markdown.
+deterministic. A language without dated pages gets no feed. Run this before
+APPLY-LAYOUTS so the entry content is the rendered Markdown.
 
 PAGE-MAP: the page map to extend.
 SITE: the site being built."
-  (let ((entries (newest-first (dated-pages (page-map-pages page-map)))))
-    (if (null entries)
-        page-map
-        (with-added-pages
-            page-map
-          (list (make-page :path +atom-path+
-                           :body (render-atom
-                                  (subseq entries
-                                          0
-                                          (min +feed-item-limit+
-                                               (length entries)))
-                                  site)))))))
+  (with-added-pages
+      page-map
+    (loop for code in (language-codes site)
+          for entries = (newest-first
+                         (dated-pages (pages-in-language
+                                       site (page-map-pages page-map) code)))
+          when entries
+            collect (make-page
+                     :path (localize-path site code +atom-path+)
+                     :body (render-atom (subseq entries
+                                                0
+                                                (min +feed-item-limit+
+                                                     (length entries)))
+                                        site
+                                        code)))))

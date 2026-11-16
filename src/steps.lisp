@@ -4,6 +4,11 @@
                 #:define-constant)
   (:import-from #:quire/conditions
                 #:unknown-layout)
+  (:import-from #:quire/languages
+                #:language-codes
+                #:language-prefix
+                #:localize-path
+                #:page-language)
   (:import-from #:quire/page
                 #:copy-page
                 #:make-page
@@ -23,6 +28,7 @@
            #:apply-layouts
            #:dated-pages
            #:newest-first
+           #:pages-in-language
            #:pages-in-section
            #:pages-with-tag
            #:slugify
@@ -69,11 +75,21 @@ TEXT: the string to convert."
                             pending-separator nil))
                      (t (setf pending-separator t)))))))
 
-(defun tag-url-path (tag)
+(defun tag-url-path (tag &optional (prefix ""))
   "Return the URL path of the page that lists the pages tagged TAG.
 
-TAG: the tag string; \"Common Lisp\" yields \"/tags/common-lisp/\"."
-  (concatenate 'string +tags-section-path+ (slugify tag) "/"))
+TAG: the tag string; \"Common Lisp\" yields \"/tags/common-lisp/\".
+PREFIX: language prefix such as \"/pt-br\"; empty for the default language."
+  (concatenate 'string prefix +tags-section-path+ (slugify tag) "/"))
+
+(defun pages-in-language (site pages code)
+  "Return the pages of PAGES written in the language CODE.
+
+SITE: the site being built.
+PAGES: a list of pages.
+CODE: a language code of SITE."
+  (remove-if-not (lambda (page) (string= code (page-language site page)))
+                 pages))
 
 (defun page-timestamp (page)
   "Return the universal time of PAGE, or 0 when it has no date.
@@ -134,60 +150,80 @@ PAGES: a list of pages."
                            :test #'string=)
         #'string<))
 
+(defun sections-of (pages)
+  "Return the distinct :SECTION names of the dated PAGES, sorted.
+
+PAGES: a list of pages."
+  (sort (remove-duplicates
+         (loop for page in (dated-pages pages)
+               for section = (getf (page-metadata page) :section)
+               when section collect section)
+         :test #'string=)
+        #'string<))
+
 (defun add-section-indexes (page-map site)
   "Return PAGE-MAP plus a listing page for each section that has dated pages.
 
-A section whose listing path already has a page, such as one written as
-index.md, is left alone. Generated pages use the :INDEX layout.
+There is one listing per language. A section whose listing path already has a
+page, such as one written as index.md, is left alone. Generated pages use the
+:INDEX layout.
 
 PAGE-MAP: the page map to extend.
-SITE: the site being built; unused, part of the step protocol."
-  (declare (ignore site))
-  (let* ((pages (page-map-pages page-map))
-         (sections (sort (remove-duplicates
-                          (loop for page in (dated-pages pages)
-                                for section = (getf (page-metadata page)
-                                                    :section)
-                                when section collect section)
-                          :test #'string=)
-                         #'string<)))
+SITE: the site being built."
+  (let ((pages (page-map-pages page-map)))
     (with-added-pages
         page-map
-      (loop for section in sections
-            for path = (format nil "/~A/" section)
-            unless (find-page page-map path)
-              collect (make-page :path path
+      (loop for code in (language-codes site)
+            append (loop for section in (sections-of
+                                         (pages-in-language site pages code))
+                         for path = (localize-path
+                                     site code (format nil "/~A/" section))
+                         unless (find-page page-map path)
+                           collect (make-page
+                                    :path path
+                                    :body ""
+                                    :metadata (list :title
+                                                    (string-capitalize section)
+                                                    :layout :index
+                                                    :section section)))))))
+
+(defun tag-pages-in-language (page-map site code)
+  "Return the tag listing and the tag pages of the language CODE.
+
+PAGE-MAP: the pages of the site, used to skip a listing that already exists.
+SITE: the site being built.
+CODE: the language code to generate pages for."
+  (let* ((tags (all-tags (pages-in-language site
+                                            (page-map-pages page-map)
+                                            code)))
+         (prefix (language-prefix site code))
+         (listing-path (localize-path site code +tags-section-path+)))
+    (when tags
+      (append (unless (find-page page-map listing-path)
+                (list (make-page :path listing-path
                                  :body ""
-                                 :metadata (list :title
-                                                 (string-capitalize section)
-                                                 :layout :index
-                                                 :section section))))))
+                                 :metadata (list :title "Tags"
+                                                 :layout :tags))))
+              (loop for tag in tags
+                    collect (make-page :path (tag-url-path tag prefix)
+                                       :body ""
+                                       :metadata (list :title tag
+                                                       :layout :tag
+                                                       :tag tag)))))))
 
 (defun add-tag-pages (page-map site)
   "Return PAGE-MAP plus one page per tag and a page that lists the tags.
 
-Tag pages use the :TAG layout and the listing uses :TAGS. Two tags with the
-same slug collide and signal PATH-CONFLICT.
+There is one set per language. Tag pages use the :TAG layout and the listing
+uses :TAGS. Two tags with the same slug collide and signal PATH-CONFLICT.
 
 PAGE-MAP: the page map to extend.
-SITE: the site being built; unused, part of the step protocol."
-  (declare (ignore site))
-  (let ((tags (all-tags (page-map-pages page-map))))
-    (if (null tags)
-        page-map
-        (with-added-pages
-            page-map
-          (append (unless (find-page page-map +tags-section-path+)
-                    (list (make-page :path +tags-section-path+
-                                     :body ""
-                                     :metadata (list :title "Tags"
-                                                     :layout :tags))))
-                  (loop for tag in tags
-                        collect (make-page :path (tag-url-path tag)
-                                           :body ""
-                                           :metadata (list :title tag
-                                                           :layout :tag
-                                                           :tag tag))))))))
+SITE: the site being built."
+  (let ((pages (loop for code in (language-codes site)
+                     append (tag-pages-in-language page-map site code))))
+    (if pages
+        (with-added-pages page-map pages)
+        page-map)))
 
 (defun find-layout (site layout page-path)
   "Return the function designator of LAYOUT on SITE.

@@ -67,7 +67,9 @@
 (defun built-paths (page-map)
   "Return the URL paths of PAGE-MAP in order, without theme assets."
   (remove-if (lambda (path)
-               (or (search "/css/" path) (search "/fonts/" path)))
+               (or (search "/css/" path)
+                   (search "/fonts/" path)
+                   (search "/img/" path)))
              (mapcar #'page-path (page-map-pages page-map))))
 
 (test default-steps-end-with-layouts

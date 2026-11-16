@@ -18,9 +18,12 @@
                              (:file "dates")
                              (:file "markdown")
                              (:file "site")
+                             (:file "languages")
                              (:file "content")
                              (:file "xml")
                              (:file "steps")
+                             (:file "outline")
+                             (:file "series")
                              (:file "feed")
                              (:file "atom")
                              (:file "sitemap")
@@ -41,6 +44,7 @@
                "quire"
                "spinneret")
   :components ((:file "assets")
+               (:file "i18n")
                (:file "layouts")))
 
 (asdf:defsystem "quire/server"
@@ -90,6 +94,9 @@
                              (:file "dates-tests")
                              (:file "markdown-tests")
                              (:file "content-tests")
+                             (:file "languages-tests")
+                             (:file "outline-tests")
+                             (:file "series-tests")
                              (:file "xml-tests")
                              (:file "steps-tests")
                              (:file "feed-tests")

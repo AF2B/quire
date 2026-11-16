@@ -7,11 +7,18 @@
                 #:add-atom-feed)
   (:import-from #:quire/feed
                 #:add-feed)
+  (:import-from #:quire/languages
+                #:add-translations)
+  (:import-from #:quire/outline
+                #:add-heading-anchors
+                #:add-reading-time)
   (:import-from #:quire/page-map
                 #:merge-page-maps)
   (:import-from #:quire/site
                 #:site-static-directories
                 #:site-steps)
+  (:import-from #:quire/series
+                #:add-series)
   (:import-from #:quire/sitemap
                 #:add-sitemap)
   (:import-from #:quire/steps
@@ -32,6 +39,10 @@ a page map. Symbols, not function objects, so that redefining a step at the
 REPL takes effect."
   (list 'add-section-indexes
         'add-tag-pages
+        'add-series
+        'add-translations
+        'add-heading-anchors
+        'add-reading-time
         'add-feed
         'add-atom-feed
         'add-sitemap

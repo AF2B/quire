@@ -85,3 +85,58 @@
 
 (test the-cache-is-off-outside-a-build
   (is (null *render-cache*)))
+
+(test details-containers-wrap-rendered-markdown
+  (let ((html (markdown->html (format nil "::: details Expansion~%some **bold**~%:::~%"))))
+    (is-true (contains-p "<details class=\"exp\"><summary>Expansion</summary>"
+                         html))
+    (is-true (contains-p "<strong>bold</strong>" html))
+    (is-true (contains-p "</details>" html))))
+
+(test details-open-containers-start-expanded
+  (is-true (contains-p "<details class=\"exp\" open>"
+                       (markdown->html
+                        (format nil "::: details-open T~%x~%:::~%")))))
+
+(test other-containers-become-divs-with-their-kind-as-class
+  (is-true (contains-p "<div class=\"note\">"
+                       (markdown->html (format nil "::: note~%x~%:::~%")))))
+
+(test container-titles-are-escaped
+  (is-true (contains-p "<summary>a &lt;b&gt;</summary>"
+                       (markdown->html
+                        (format nil "::: details a <b>~%x~%:::~%")))))
+
+(test container-fences-inside-code-blocks-stay-literal
+  (let ((html (markdown->html
+               (format nil "```~%::: details Hidden~%```~%"))))
+    (is-false (contains-p "<details" html))
+    (is-true (contains-p "Hidden" html))))
+
+(test an-unclosed-container-ends-with-the-document
+  (is-true (contains-p "</details>"
+                       (markdown->html (format nil "::: details T~%body~%")))))
+
+(test footnotes-become-numbered-links-and-a-list
+  (let ((html (markdown->html
+               (format nil "One[^a] two[^b] again[^a].~%~%[^a]: First.~%[^b]: Second *note*.~%"))))
+    (is-true (contains-p "<sup class=\"fnref\"><a id=\"fnref-1\" href=\"#fn-1\">1</a></sup>"
+                         html))
+    (is-true (contains-p "<sup class=\"fnref\"><a id=\"fnref-2\" href=\"#fn-2\">2</a></sup>"
+                         html))
+    (is-true (contains-p "<sup class=\"fnref\"><a href=\"#fn-1\">1</a></sup>"
+                         html))
+    (is-true (contains-p "<ol class=\"footnotes\">" html))
+    (is-true (contains-p "<li id=\"fn-2\">Second <em>note</em>." html))
+    (is-false (contains-p "[^a]:" html))))
+
+(test footnote-markers-in-code-and-without-definition-are-left-alone
+  (let ((html (markdown->html
+               (format nil "Code `[^a]` and [^missing] and real[^a].~%~%[^a]: Note.~%"))))
+    (is-true (contains-p "<code>[^a]</code>" html))
+    (is-true (contains-p "[^missing]" html))
+    (is-true (contains-p "<li id=\"fn-1\">Note." html))))
+
+(test a-definition-nobody-references-draws-no-list
+  (is-false (contains-p "footnotes"
+                        (markdown->html (format nil "Text.~%~%[^a]: Unused.~%")))))

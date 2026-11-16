@@ -9,10 +9,13 @@
                  #:quire/export
                  #:quire/feed
                  #:quire/front-matter
+                 #:quire/languages
                  #:quire/markdown
+                 #:quire/outline
                  #:quire/page
                  #:quire/page-map
                  #:quire/paths
+                 #:quire/series
                  #:quire/site
                  #:quire/sitemap
                  #:quire/steps

@@ -5,7 +5,9 @@
   (:import-from #:quire/conditions
                 #:front-matter-error)
   (:export #:+fence+
-           #:split-front-matter))
+           #:join-lines
+           #:split-front-matter
+           #:split-lines))
 
 (in-package #:quire/front-matter)
 

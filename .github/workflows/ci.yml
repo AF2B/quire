@@ -49,7 +49,14 @@ jobs:
       - name: Check the links of the demo and product sites
         run: |
           bin/quire check --site examples/demo/site.lisp
+          bin/quire check --site examples/blog/site.lisp
           bin/quire check --site site/site.lisp
+
+      - name: Build the multilingual blog twice and compare
+        run: |
+          bin/quire build --site examples/blog/site.lisp --out /tmp/blog-a
+          bin/quire build --site examples/blog/site.lisp --out /tmp/blog-b
+          diff -r /tmp/blog-a /tmp/blog-b
 
       - name: Build the product site
         run: bin/quire build --site site/site.lisp --out /tmp/product-site

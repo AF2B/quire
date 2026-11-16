@@ -14,10 +14,13 @@
                 #:walk-files)
   (:import-from #:quire/front-matter
                 #:split-front-matter)
+  (:import-from #:quire/languages
+                #:split-language-path)
   (:import-from #:quire/markdown
                 #:markdown->html)
   (:import-from #:quire/page
-                #:make-page)
+                #:make-page
+                #:page-source)
   (:import-from #:quire/page-map
                 #:add-page
                 #:make-page-map)
@@ -28,7 +31,8 @@
                 #:site-include-drafts-p
                 #:site-posts-section
                 #:site-static-directories)
-  (:export #:read-content
+  (:export #:page-source-name
+           #:read-content
            #:read-static-directory
            #:source-path->url-path
            #:title-from-slug))
@@ -99,6 +103,12 @@ URL-PATH: a valid directory URL path."
         (car (last segments))
         "home")))
 
+(defun positive-integer-p (value)
+  "Return true when VALUE is an integer greater than zero.
+
+VALUE: any object."
+  (and (integerp value) (plusp value)))
+
 (defun check-metadata (metadata source)
   "Signal FRONT-MATTER-ERROR when a known METADATA key has the wrong type.
 
@@ -116,6 +126,9 @@ SOURCE: origin of the metadata, for messages."
     (require-type :path #'stringp "a string")
     (require-type :description #'stringp "a string")
     (require-type :lang #'stringp "a string")
+    (require-type :series #'stringp "a string")
+    (require-type :part #'positive-integer-p "a positive integer")
+    (require-type :series-total #'positive-integer-p "a positive integer")
     (require-type :layout #'keywordp "a keyword")
     (require-type :tags
                   (lambda (tags) (and (listp tags) (every #'stringp tags)))
@@ -127,7 +140,7 @@ SOURCE: origin of the metadata, for messages."
 Adds :TITLE, :SECTION, :LAYOUT and, when :DATE is present, :TIMESTAMP.
 
 METADATA: the property list read from the front matter.
-URL-PATH: the final URL path of the page.
+URL-PATH: the URL path of the page without its language prefix.
 SECTION: first segment of URL-PATH, or NIL.
 POSTS-SECTION: name of the section that holds posts."
   (let ((result (copy-list metadata)))
@@ -158,14 +171,31 @@ PATHNAME: the file to read."
       (check-metadata metadata source)
       (let* ((url-path (or (getf metadata :path)
                            (source-path->url-path relative-name)))
-             (section (url-path-section url-path)))
+             (key (nth-value 1 (split-language-path site url-path)))
+             (section (url-path-section key)))
         (make-page :path url-path
                    :body (markdown->html markdown)
                    :metadata (page-metadata-for metadata
-                                                url-path
+                                                key
                                                 section
                                                 (site-posts-section site))
                    :source source)))))
+
+(defun page-source-name (site page)
+  "Return the file of PAGE relative to the content directory of SITE, or NIL.
+
+The name uses forward slashes, as in \"posts/hello.md\", so a theme can append
+it to the address of a repository.
+
+SITE: the site being built.
+PAGE: the page to inspect."
+  (let ((source (page-source page)))
+    (when source
+      (let ((relative (uiop:enough-pathname
+                       (uiop:parse-native-namestring source)
+                       (site-content-directory site))))
+        (unless (uiop:absolute-pathname-p relative)
+          (uiop:native-namestring relative))))))
 
 (defun draft-p (page)
   "Return true when PAGE is marked as a draft.

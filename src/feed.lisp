@@ -4,6 +4,9 @@
                 #:define-constant)
   (:import-from #:quire/dates
                 #:format-rfc-822)
+  (:import-from #:quire/languages
+                #:language-codes
+                #:localize-path)
   (:import-from #:quire/page
                 #:make-page
                 #:page-body
@@ -19,6 +22,7 @@
   (:import-from #:quire/steps
                 #:dated-pages
                 #:newest-first
+                #:pages-in-language
                 #:with-added-pages)
   (:import-from #:quire/xml
                 #:xml-escape)
@@ -54,11 +58,12 @@ SITE: the site being built."
               (xml-escape (page-body page))))
     (format out "    </item>~%")))
 
-(defun render-feed (items site)
+(defun render-feed (items site code)
   "Return the RSS 2.0 document, as a string, that lists ITEMS.
 
 ITEMS: dated pages, newest first.
-SITE: the site being built."
+SITE: the site being built.
+CODE: the language code of the feed."
   (with-output-to-string (out)
     (format out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>~%")
     (format out "<rss version=\"2.0\" ~
@@ -68,12 +73,12 @@ SITE: the site being built."
     (format out "    <link>~A</link>~%" (xml-escape (site-url site "/")))
     (format out "    <description>~A</description>~%"
             (xml-escape (site-description site)))
-    (format out "    <language>~A</language>~%" (xml-escape (site-language site)))
+    (format out "    <language>~A</language>~%" (xml-escape code))
     (format out "    <lastBuildDate>~A</lastBuildDate>~%"
             (format-rfc-822 (getf (page-metadata (first items)) :timestamp)))
     (format out "    <atom:link href=\"~A\" rel=\"self\" ~
                  type=\"application/rss+xml\"/>~%"
-            (xml-escape (site-url site +feed-path+)))
+            (xml-escape (site-url site (localize-path site code +feed-path+))))
     (dolist (item items)
       (write-item out item site))
     (format out "  </channel>~%</rss>~%")))
@@ -81,22 +86,26 @@ SITE: the site being built."
 (defun add-feed (page-map site)
   "Return PAGE-MAP plus an RSS feed of its most recent dated pages.
 
-The feed lives at /feed.xml. The date written as lastBuildDate is the date of
-the newest item, never the build time, so the output is deterministic. When no
-page is dated the map is returned unchanged. Run this before APPLY-LAYOUTS so
-the item descriptions are the rendered Markdown.
+The feed of the default language lives at /feed.xml and each other language has
+its own below its prefix, such as /pt-br/feed.xml. The date written as
+lastBuildDate is the date of the newest item, never the build time, so the
+output is deterministic. A language without dated pages gets no feed. Run this
+before APPLY-LAYOUTS so the item descriptions are the rendered Markdown.
 
 PAGE-MAP: the page map to extend.
 SITE: the site being built."
-  (let ((items (newest-first (dated-pages (page-map-pages page-map)))))
-    (if (null items)
-        page-map
-        (with-added-pages
-            page-map
-          (list (make-page :path +feed-path+
-                           :body (render-feed
-                                  (subseq items
-                                          0
-                                          (min +feed-item-limit+
-                                               (length items)))
-                                  site)))))))
+  (with-added-pages
+      page-map
+    (loop for code in (language-codes site)
+          for items = (newest-first
+                       (dated-pages (pages-in-language
+                                     site (page-map-pages page-map) code)))
+          when items
+            collect (make-page
+                     :path (localize-path site code +feed-path+)
+                     :body (render-feed (subseq items
+                                                0
+                                                (min +feed-item-limit+
+                                                     (length items)))
+                                        site
+                                        code)))))

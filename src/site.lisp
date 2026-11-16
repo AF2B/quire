@@ -12,6 +12,7 @@
            #:site-extra
            #:site-include-drafts-p
            #:site-language
+           #:site-languages
            #:site-layouts
            #:site-link
            #:site-posts-section
@@ -56,6 +57,9 @@
    (language :initarg :language
              :reader site-language
              :documentation "Language code such as \"en\".")
+   (languages :initarg :languages
+              :reader site-languages
+              :documentation "List of plists (:CODE :NAME :FLAG), default first.")
    (author :initarg :author
            :reader site-author
            :documentation "Author name, or NIL.")
@@ -100,10 +104,39 @@ DIRECTORY: a pathname designator, absolute or relative.
 ROOT: the directory that relative ones are taken from."
   (merge-pathnames (uiop:ensure-directory-pathname directory) root))
 
+(defun normalize-languages (default languages)
+  "Return LANGUAGES as plists, with DEFAULT first and the other codes lowercase.
+
+Signals a type error when an entry has no :CODE string. The code of the default
+language is kept as written, so it matches the language the site declares.
+
+DEFAULT: code of the default language.
+LANGUAGES: a list of plists with :CODE, :NAME and :FLAG, or NIL."
+  (flet ((with-code (entry code)
+           (list* :code code
+                  (loop for (key value) on entry by #'cddr
+                        unless (eq key :code)
+                          append (list key value)))))
+    (let* ((entries (mapcar (lambda (entry)
+                              (check-type (getf entry :code) string)
+                              entry)
+                            languages))
+           (declared (find default entries
+                           :key (lambda (entry) (getf entry :code))
+                           :test #'string-equal)))
+      (cons (if declared
+                (with-code declared default)
+                (list :code default :name default))
+            (loop for entry in entries
+                  unless (eq entry declared)
+                    collect (with-code entry
+                              (string-downcase (getf entry :code))))))))
+
 (defun make-site (&key title
                        (description "")
                        (base-url "")
                        (language +default-language+)
+                       languages
                        author
                        (root (default-root))
                        (content-directory +default-content-directory+)
@@ -119,7 +152,10 @@ TITLE: name of the site; required.
 DESCRIPTION: one sentence about the site.
 BASE-URL: public address, such as \"https://example.com\"; a trailing slash is
   dropped. Leave empty to build with root-relative links.
-LANGUAGE: language code; defaults to \"en\".
+LANGUAGE: language code of the default language; defaults to \"en\".
+LANGUAGES: every language of the site as plists with :CODE, :NAME and :FLAG; the
+  default language is added first when missing. Pages of any other language
+  live in a directory named after its code, such as content/pt-br/.
 AUTHOR: author name, or NIL.
 ROOT: directory that relative paths are taken from; defaults to the directory
   of the file being loaded.
@@ -139,6 +175,7 @@ EXTRA: plist of values for the theme, such as :NAV."
                    :description description
                    :base-url (string-right-trim "/" base-url)
                    :language language
+                   :languages (normalize-languages language languages)
                    :author author
                    :root absolute-root
                    :content-directory (resolve-directory content-directory
