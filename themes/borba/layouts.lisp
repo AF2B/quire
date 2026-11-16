@@ -2,6 +2,8 @@
   (:use #:cl)
   (:import-from #:alexandria
                 #:define-constant)
+  (:import-from #:quire/atom
+                #:+atom-path+)
   (:import-from #:quire/build
                 #:default-steps)
   (:import-from #:quire/dates
@@ -208,7 +210,8 @@ PAGES: every page of the site.
 MAIN: the HTML string placed inside the main element."
   (spinneret:with-html-string
     (:doctype)
-    (:html :lang (site-language site)
+    (:html :lang (or (getf (page-metadata page) :lang)
+                    (site-language site))
      (:head
       (:meta :charset "utf-8")
       (:meta :name "viewport" :content "width=device-width, initial-scale=1")
@@ -223,7 +226,11 @@ MAIN: the HTML string placed inside the main element."
         (:link :rel "alternate"
                :type "application/rss+xml"
                :title (site-title site)
-               :href (site-link site +feed-path+))))
+               :href (site-link site +feed-path+))
+        (:link :rel "alternate"
+               :type "application/atom+xml"
+               :title (site-title site)
+               :href (site-link site +atom-path+))))
      (:body
       (:a :class "skip" :href "#main" "Skip to content")
       (:raw (header-html page site))

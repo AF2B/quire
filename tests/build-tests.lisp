@@ -91,7 +91,7 @@
   (with-temp-directory (root)
     (write-sample-content root)
     (let ((page-map (build-site (sample-site root))))
-      (is (equal '("/" "/about/" "/feed.xml" "/posts/" "/posts/first/"
+      (is (equal '("/" "/about/" "/atom.xml" "/feed.xml" "/posts/" "/posts/first/"
                    "/posts/second/" "/robots.txt" "/sitemap.xml" "/tags/"
                    "/tags/lisp/" "/tags/meta/")
                  (built-paths page-map)))

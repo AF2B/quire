@@ -115,6 +115,7 @@ SOURCE: origin of the metadata, for messages."
     (require-type :date #'stringp "a string")
     (require-type :path #'stringp "a string")
     (require-type :description #'stringp "a string")
+    (require-type :lang #'stringp "a string")
     (require-type :layout #'keywordp "a keyword")
     (require-type :tags
                   (lambda (tags) (and (listp tags) (every #'stringp tags)))

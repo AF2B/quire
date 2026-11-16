@@ -137,6 +137,19 @@ NAV: navigation entries as (LABEL . PATH) conses, or NIL for the default."
     (is-true (search "article" (subseq html (search "og:type" html)
                                        (+ (search "og:type" html) 40))))))
 
+(test a-page-can-override-the-site-language
+  (is-true (search "<html lang=pt-BR>"
+                   (themed-page-html :front-matter "(:title \"Oi\" :lang \"pt-BR\")")))
+  (is-true (search "<html lang=en>" (themed-page-html))))
+
+(test dated-sites-advertise-both-feeds
+  (let ((html (themed-page-html
+               :base-url "https://example.com"
+               :front-matter "(:title \"T\" :date \"2026-11-14\")")))
+    (is-true (search "application/rss+xml" html))
+    (is-true (search "application/atom+xml" html))
+    (is-true (search "/atom.xml" html))))
+
 (test navigation-marks-the-current-page
   (let ((html (themed-page-html :nav '(("Home" . "/") ("This" . "/x/")))))
     (is-true (search "aria-current=page>This" html))

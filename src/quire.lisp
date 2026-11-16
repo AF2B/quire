@@ -1,6 +1,7 @@
 (uiop:define-package #:quire
   (:documentation "Public API of quire: re-exports the symbols a site needs.")
-  (:use-reexport #:quire/build
+  (:use-reexport #:quire/atom
+                 #:quire/build
                  #:quire/check
                  #:quire/conditions
                  #:quire/content

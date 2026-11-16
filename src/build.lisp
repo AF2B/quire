@@ -3,6 +3,8 @@
   (:import-from #:quire/content
                 #:read-content
                 #:read-static-directory)
+  (:import-from #:quire/atom
+                #:add-atom-feed)
   (:import-from #:quire/feed
                 #:add-feed)
   (:import-from #:quire/page-map
@@ -31,6 +33,7 @@ REPL takes effect."
   (list 'add-section-indexes
         'add-tag-pages
         'add-feed
+        'add-atom-feed
         'add-sitemap
         'apply-layouts))
 
