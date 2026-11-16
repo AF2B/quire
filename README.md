@@ -18,7 +18,9 @@ server: redefine a layout and the browser reloads.
 
 - Markdown with Lisp front matter, fenced code highlighted for Lisp
 - Layouts are plain Lisp functions, looked up late, so they are live at the REPL
-- Tags, section listings, RSS feed and sitemap out of the box
+- Tags, section listings, RSS and Atom feeds and a sitemap out of the box
+- Canonical link and Open Graph tags for shared links
+- `quire check` finds broken internal links, for CI
 - Deterministic output: same content in, same bytes out
 - Dev server with live reload (server-sent events), rebuilds on file changes
 - Single executable: `quire build`, `quire serve`, about 5 ms to start
@@ -98,6 +100,8 @@ The body, in Markdown.
 | `:layout` | Keyword; defaults to `:post` under `posts/`, else `:page` |
 | `:path` | Overrides the URL path |
 | `:draft` | `t` leaves the page out unless `--drafts` |
+| `:lang` | Language of this page; defaults to the site's |
+| `:image` | Share image for Open Graph and Twitter cards |
 | `:description`, `:noindex`, `:hide-title` | Used by the theme and the sitemap |
 
 The front matter is read with `*read-eval*` off, so it cannot run code.
@@ -117,8 +121,10 @@ to `make-site` as symbols, not function objects, so redefining one takes effect:
 ```
 
 A build is a list of steps `(page-map site) -> page-map`, run in order. The
-defaults are `add-section-indexes`, `add-tag-pages`, `add-feed`, `add-sitemap`
-and `apply-layouts` (always last). Add your own anywhere before it.
+defaults are `add-section-indexes`, `add-tag-pages`, `add-feed`,
+`add-atom-feed`, `add-sitemap` and `apply-layouts` (always last). Add your own
+anywhere before it: a step is the extension point, there is no separate plugin
+system (see the guide).
 
 ## HTML output
 
@@ -192,11 +198,14 @@ Quire signals typed conditions, all under `quire-error`, with restarts:
 
 ```
 quire build [--site FILE] [--out DIR] [--clean] [--drafts]
+quire check [--site FILE] [--drafts]
 quire serve [--site FILE] [--port N] [--host ADDR] [--drafts]
 quire version | help
 ```
 
-Exit codes: `0` ok, `1` quire error, `2` usage error, `70` internal error,
+`quire check` builds the site and reports every internal link that leads
+nowhere; it exits with `1` when there is one. Exit codes: `0` ok, `1` quire
+error or broken links, `2` usage error, `70` internal error,
 `130` interrupted. `--clean` empties the output directory first, but only when
 it is new, empty or marked by a `.quire-output` file written by a previous
 build.
@@ -230,8 +239,10 @@ FiveAM and usocket (tests only).
 - Raw HTML in Markdown passes through unchanged (3bmd). Do not render content
   you do not trust.
 - 3bmd is not strict CommonMark. Fenced code needs backticks, not tildes.
-- Files whose name has no extension (such as `CNAME`) cannot be a site path and
-  are skipped with a warning; dot-files are ignored.
+- Files whose name has no extension cannot be a site path and are skipped with
+  a warning, except `CNAME` and `LICENSE`. Hidden files are ignored, except
+  `.nojekyll` and `.well-known/`.
 - The watcher polls; it does not use inotify. Very large content trees will
   make each poll slower.
-- No incremental builds, i18n, image pipeline or plugin system yet.
+- No image pipeline yet; i18n is a `:lang` per page, with no translation links.
+- One-shot builds are not incremental; the dev server reuses unchanged Markdown.

@@ -10,6 +10,15 @@ Until 1.0.0 the public API may change between minor versions.
 
 ### Added
 
+- `quire check`: reports internal links that lead nowhere, honoring the base
+  URL path, and exits with 1 when there are any.
+- Canonical link and Open Graph and Twitter card tags in the default theme,
+  with `:image` in the front matter or the site options.
+- Atom 1.0 feed at `/atom.xml`, built by the new default step `add-atom-feed`.
+- `:lang` front matter key to set the language of one page.
+- `CNAME`, `LICENSE`, `.nojekyll` and `.well-known/` are copied as site files.
+- The dev server reuses the rendered Markdown of unchanged files.
+- Guide page on writing build steps.
 - Product site and guide in `site/`, built entirely with quire and published
   to GitHub Pages by a workflow.
 - The default theme shows the BORBA wordmark as the header logo.

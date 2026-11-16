@@ -10,12 +10,16 @@ quire is at `0.1.0`, a public preview. The API may change before 1.0.
   not trust.
 - The Markdown parser (3bmd) is not strict CommonMark. Fenced code needs
   backticks, not tildes.
-- Files whose name has no extension (such as `CNAME`) cannot be a site path
-  and are skipped with a warning; dot-files are ignored.
+- Files whose name has no extension cannot be a site path and are skipped with
+  a warning, except `CNAME` and `LICENSE`. Hidden files are ignored, except
+  `.nojekyll` and `.well-known/`.
 - The watcher polls; it does not use inotify. Very large content trees make
   each poll slower.
-- No incremental builds, i18n, image pipeline or plugin system yet.
-- The feed is RSS only.
+- Every build reads and renders the whole site; the dev server reuses the
+  rendered Markdown of unchanged files, but a one-shot build does not.
+- No image pipeline yet, and i18n is limited to a `:lang` per page: there are
+  no translation links between pages.
+- Extensions are build steps; there is no separate plugin system.
 
 Found a problem? Open an issue on
 [GitHub](https://github.com/AF2B/quire/issues).

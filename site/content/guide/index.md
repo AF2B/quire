@@ -9,8 +9,9 @@ order the first time.
 1. [Getting started](getting-started/): install quire and build the demo site.
 2. [Content](content/): Markdown files, front matter and URLs.
 3. [Layouts and steps](layouts/): pages as functions, builds as pipelines.
-4. [HTML output](html/): what the pages look like and how to write HTML.
-5. [REPL workflow](repl/): develop with the server running in your image.
-6. [Errors](errors/): the conditions quire signals and their restarts.
-7. [Command line](cli/): `quire build`, `quire serve` and their options.
-8. [Limits](limits/): what quire does not do yet.
+4. [Extending quire](extending/): write your own build step.
+5. [HTML output](html/): what the pages look like and how to write HTML.
+6. [REPL workflow](repl/): develop with the server running in your image.
+7. [Errors](errors/): the conditions quire signals and their restarts.
+8. [Command line](cli/): `quire build`, `quire check`, `quire serve`.
+9. [Limits](limits/): what quire does not do yet.

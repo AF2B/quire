@@ -6,7 +6,9 @@
 Each file under `content/` becomes a page. `about.md` is served at `/about/`,
 `posts/first.md` at `/posts/first/`, and `index.md` at `/`. Files that are not
 Markdown, such as images, are copied as bytes. Everything under `static/` is
-copied verbatim to the root of the site.
+copied verbatim to the root of the site. Files such as `CNAME`, `LICENSE`,
+`.nojekyll` and everything under `.well-known/` are copied too; other hidden
+files are ignored.
 
 ## Front matter
 
@@ -33,6 +35,8 @@ The front matter is read with `*read-eval*` off, so it cannot run code.
 | `:layout` | Keyword; defaults to `:post` under `posts/`, else `:page` |
 | `:path` | Overrides the URL path |
 | `:draft` | `t` leaves the page out unless `--drafts` |
+| `:lang` | Language of this page, such as `"pt-BR"`; defaults to the site's |
+| `:image` | Share image for Open Graph and Twitter cards; a URL or a site path |
 | `:description`, `:noindex`, `:hide-title` | Used by the theme and the sitemap |
 
 ## Dates

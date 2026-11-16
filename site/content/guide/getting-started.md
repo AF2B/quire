@@ -57,4 +57,6 @@ static/               ->  copied verbatim to the root
 The `:base-url` may include a path, as in `https://example.com/blog`: every
 link the theme writes then starts with `/blog`.
 
+Check that no link is broken with `bin/quire check --site examples/demo/site.lisp`.
+
 Next: [content files](../content/).

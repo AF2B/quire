@@ -10,7 +10,10 @@ The pages quire writes are plain, modern HTML5:
 - Semantic landmarks (`header`, `nav`, `main`, `article`, `footer`), a skip
   link, `aria-current` on the active navigation entry and `<time datetime>`
   for dates
-- An RSS alternate link when the site has dated pages
+- RSS and Atom alternate links when the site has dated pages
+- A canonical link and Open Graph and Twitter card tags, so shared links show a
+  title, a description and an image; set `:image` in the front matter or in the
+  site's `:extra` to choose the image
 - Text and attributes escaped by default
 
 ## Writing HTML in layouts

@@ -36,6 +36,7 @@ defaults are:
 | `add-section-indexes` | A listing page for each section that has dated pages and no `index.md` |
 | `add-tag-pages` | One page per tag, plus `/tags/` |
 | `add-feed` | `/feed.xml`, RSS 2.0, the latest 20 dated pages |
+| `add-atom-feed` | `/atom.xml`, Atom 1.0, the same pages |
 | `add-sitemap` | `/sitemap.xml` |
 | `apply-layouts` | Turns every page into HTML; always last |
 
@@ -54,4 +55,4 @@ Because a page is data, adding one is a function call:
                      :body "<h1>Hello</h1>"))
 ```
 
-Next: [HTML output](../html/).
+Next: [extending quire](../extending/).

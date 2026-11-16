@@ -7,6 +7,7 @@
   (:import-from #:quire/dates
                 #:parse-date)
   (:import-from #:quire/page
+                #:copy-page
                 #:make-page
                 #:page-body
                 #:page-metadata
@@ -190,3 +191,43 @@
                                                (declare (ignore page site pages))
                                                42)))))
     (signals type-error (resolve-body (find-page result "/a/")))))
+
+;;; The step written in the guide page "Extending quire" (site/content/guide/
+;;; extending.md). Keep the two in sync.
+
+(defconstant +words-per-minute+ 200
+  "Reading speed used to estimate the reading time.")
+
+(defun reading-minutes (page)
+  "Return the minutes PAGE takes to read, at least one."
+  (max 1 (ceiling (1+ (count #\Space (page-body page))) +words-per-minute+)))
+
+(defun add-reading-time (page-map site)
+  "Return PAGE-MAP with :READING-MINUTES in the metadata of every dated page."
+  (declare (ignore site))
+  (let ((result (make-page-map)))
+    (dolist (page (page-map-pages page-map) result)
+      (add-page result
+                (if (getf (page-metadata page) :timestamp)
+                    (copy-page page
+                               :metadata (list* :reading-minutes
+                                                (reading-minutes page)
+                                                (page-metadata page)))
+                    page)))))
+
+(test a-custom-step-is-a-plain-function-of-a-page-map-and-a-site
+  (let* ((input (map-of-pages (post "/a/" "2026-01-01")
+                              (make-page :path "/about/" :body "x")))
+         (output (add-reading-time input *site*)))
+    (is (= 1 (getf (page-metadata (find-page output "/a/")) :reading-minutes)))
+    (is-false (getf (page-metadata (find-page output "/about/"))
+                    :reading-minutes))
+    (is-false (getf (page-metadata (find-page input "/a/")) :reading-minutes))))
+
+(test a-custom-step-runs-through-make-site-before-layouts
+  (let* ((site (make-site :title "T"
+                          :steps '(add-reading-time)))
+         (output (quire/build:run-steps (quire/site:site-steps site)
+                                        (map-of-pages (post "/a/" "2026-01-01"))
+                                        site)))
+    (is (getf (page-metadata (find-page output "/a/")) :reading-minutes))))
