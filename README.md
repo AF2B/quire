@@ -28,7 +28,8 @@ server: redefine a layout and the browser reloads.
   theme-agnostic)
 
 Status: `0.1.0`, a public preview: the API may still change before 1.0.
-SBCL only. License: MIT (see `LICENSE`); the bundled fonts are under the SIL
+SBCL is the reference implementation; the test suite also passes on ECL and
+Clozure CL (experimental CI jobs). License: MIT (see `LICENSE`); the bundled fonts are under the SIL
 Open Font License (see `NOTICE.md`). Changes are listed in `CHANGELOG.md`.
 
 Documentation: **<https://af2b.github.io/quire/>**. That site, guide included,
@@ -235,7 +236,9 @@ FiveAM and usocket (tests only).
 
 ## Limits
 
-- SBCL only; interrupt handling and `save-lisp-and-die` are SBCL-specific.
+- SBCL is the reference implementation. The suite also passes on ECL 21.2 and
+  Clozure CL 1.13, but those runs are experimental, and the standalone
+  executable (`make binary`) and Ctrl-C handling are SBCL-only.
 - Raw HTML in Markdown passes through unchanged (3bmd). Do not render content
   you do not trust.
 - 3bmd is not strict CommonMark. Fenced code needs backticks, not tildes.

@@ -5,7 +5,9 @@
 
 quire is at `0.1.0`, a public preview. The API may change before 1.0.
 
-- SBCL only; interrupt handling and `save-lisp-and-die` are SBCL-specific.
+- SBCL is the reference implementation. The suite also passes on ECL 21.2 and
+  Clozure CL 1.13, but those runs are experimental, and the standalone
+  executable and Ctrl-C handling are SBCL-only.
 - Raw HTML in Markdown passes through unchanged. Do not render content you do
   not trust.
 - The Markdown parser (3bmd) is not strict CommonMark. Fenced code needs

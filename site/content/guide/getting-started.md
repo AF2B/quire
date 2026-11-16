@@ -5,7 +5,8 @@
 
 ## Requirements
 
-SBCL, ASDF and Quicklisp. quire runs on SBCL only.
+SBCL, ASDF and Quicklisp. SBCL is the reference implementation: the test suite
+also passes on ECL and Clozure CL, but the standalone executable is SBCL-only.
 
 ## Build the executable
 

@@ -19,9 +19,18 @@ Until 1.0.0 the public API may change between minor versions.
 - `CNAME`, `LICENSE`, `.nojekyll` and `.well-known/` are copied as site files.
 - The dev server reuses the rendered Markdown of unchanged files.
 - Guide page on writing build steps.
+- Release workflow: pushing a `v*` tag builds the executable and attaches it,
+  with its checksum, to the GitHub release.
+- The test suite passes on ECL and Clozure CL; CI runs both as experimental
+  jobs.
 - Product site and guide in `site/`, built entirely with quire and published
   to GitHub Pages by a workflow.
 - The default theme shows the BORBA wordmark as the header logo.
+
+### Fixed
+
+- `export-site` could report a wrong file count on implementations whose `sort`
+  reuses the conses of the list it sorts.
 
 ## [0.1.0] - 2026-11-15
 
