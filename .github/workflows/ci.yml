@@ -53,3 +53,47 @@ jobs:
 
       - name: Build the product site
         run: bin/quire build --site site/site.lisp --out /tmp/product-site
+
+  portability:
+    name: Test suite on ${{ matrix.name }} (experimental)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ECL
+            lisp: ecl
+            quit: ext:quit
+          - name: Clozure CL
+            lisp: /opt/ccl/lx86cl64
+            quit: quit
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Install ECL
+        if: matrix.name == 'ECL'
+        run: sudo apt-get update && sudo apt-get install -y ecl curl netbase
+
+      - name: Install Clozure CL
+        if: matrix.name == 'Clozure CL'
+        run: |
+          curl -fsSL https://github.com/Clozure/ccl/releases/download/v1.13/ccl-1.13-linuxx86.tar.gz \
+            | sudo tar xz -C /opt
+          echo "CCL_DEFAULT_DIRECTORY=/opt/ccl" >> "$GITHUB_ENV"
+
+      - name: Install Quicklisp
+        run: |
+          curl -fsSL https://beta.quicklisp.org/quicklisp.lisp -o /tmp/quicklisp.lisp
+          ${{ matrix.lisp }} --load /tmp/quicklisp.lisp \
+            --eval '(quicklisp-quickstart:install)' \
+            --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
+            --eval '(${{ matrix.quit }} 0)'
+
+      - name: Run the test suite
+        run: |
+          ${{ matrix.lisp }} --load "$HOME/quicklisp/setup.lisp" \
+            --eval '(push (truename ".") asdf:*central-registry*)' \
+            --eval '(handler-case (progn (ql:quickload "quire/tests") (asdf:test-system "quire")) (error (e) (format t "~%FAILED: ~A~%" e) (${{ matrix.quit }} 1)))' \
+            --eval '(${{ matrix.quit }} 0)'
