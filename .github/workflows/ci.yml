@@ -46,5 +46,10 @@ jobs:
           bin/quire build --site examples/demo/site.lisp --out /tmp/site-b
           diff -r /tmp/site-a /tmp/site-b
 
+      - name: Check the links of the demo and product sites
+        run: |
+          bin/quire check --site examples/demo/site.lisp
+          bin/quire check --site site/site.lisp
+
       - name: Build the product site
         run: bin/quire build --site site/site.lisp --out /tmp/product-site

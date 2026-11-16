@@ -41,6 +41,9 @@ jobs:
       - name: Build the executable
         run: make binary
 
+      - name: Check the links of the site
+        run: bin/quire check --site site/site.lisp
+
       - name: Build the site with quire
         run: bin/quire build --site site/site.lisp --out public --clean
 
