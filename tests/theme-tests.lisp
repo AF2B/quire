@@ -104,6 +104,39 @@ NAV: navigation entries as (LABEL . PATH) conses, or NIL for the default."
     (is-true (search "class=dot>.</span></a>" html))
     (is-false (search "aria-label=\"Site" html))))
 
+(test pages-carry-canonical-and-open-graph-tags
+  (let ((html (themed-page-html :base-url "https://example.com/blog")))
+    (is-true (search "rel=canonical" html))
+    (is-true (search "https://example.com/blog/x/" html))
+    (is-true (search "og:type" html))
+    (is-true (search "website" html))
+    (is-true (search "og:title" html))
+    (is-true (search "twitter:card" html))
+    (is-false (search "og:image" html))))
+
+(test pages-without-a-base-url-have-no-canonical-link
+  (let ((html (themed-page-html)))
+    (is-false (search "rel=canonical" html))
+    (is-false (search "og:url" html))
+    (is-true (search "og:title" html))))
+
+(test front-matter-image-becomes-an-absolute-open-graph-image
+  (let ((html (themed-page-html
+               :base-url "https://example.com/blog"
+               :front-matter "(:title \"T\" :image \"/img/cover.png\")")))
+    (is-true (search "og:image" html))
+    (is-true (search "https://example.com/blog/img/cover.png" html))
+    (is-true (search "summary_large_image" html))))
+
+(test dated-pages-are-articles-with-a-publication-time
+  (let ((html (themed-page-html
+               :base-url "https://example.com"
+               :front-matter "(:title \"T\" :date \"2026-11-14\")")))
+    (is-true (search "article:published_time" html))
+    (is-true (search "2026-11-14" html))
+    (is-true (search "article" (subseq html (search "og:type" html)
+                                       (+ (search "og:type" html) 40))))))
+
 (test navigation-marks-the-current-page
   (let ((html (themed-page-html :nav '(("Home" . "/") ("This" . "/x/")))))
     (is-true (search "aria-current=page>This" html))

@@ -17,8 +17,10 @@
                 #:site-extra
                 #:site-language
                 #:site-link
+                #:site-base-url
                 #:site-posts-section
-                #:site-title)
+                #:site-title
+                #:site-url)
   (:import-from #:quire/steps
                 #:all-tags
                 #:dated-pages
@@ -92,6 +94,65 @@ SITE: the site being built."
       (site-title site)
       (format nil "~A — ~A" (page-title page) (site-title site))))
 
+(define-constant +absolute-url-prefix+ "http"
+  :test #'string=
+  :documentation "Start of an image address that is already absolute.")
+
+(define-constant +card-with-image+ "summary_large_image"
+  :test #'string=
+  :documentation "Twitter card type used when the page has an image.")
+
+(define-constant +card-without-image+ "summary"
+  :test #'string=
+  :documentation "Twitter card type used when the page has no image.")
+
+(defun absolute-url (site address)
+  "Return ADDRESS as an absolute URL on SITE.
+
+An address that already starts with http is returned unchanged.
+
+SITE: the site being built.
+ADDRESS: an absolute URL or a URL path such as \"/img/cover.png\"."
+  (if (eql 0 (search +absolute-url-prefix+ address))
+      address
+      (site-url site address)))
+
+(defun social-meta-html (page site)
+  "Return the canonical link and the Open Graph and Twitter card meta tags.
+
+The canonical and og:url tags are written only when the site has a base URL.
+The image comes from :IMAGE in the front matter, else from :IMAGE in the site's
+extra options.
+
+PAGE: the page being rendered.
+SITE: the site being built."
+  (let* ((metadata (page-metadata page))
+         (url (when (plusp (length (site-base-url site)))
+                (site-url site (page-path page))))
+         (description (or (getf metadata :description)
+                          (site-description site)))
+         (image (let ((address (or (getf metadata :image)
+                                   (getf (site-extra site) :image))))
+                  (when address
+                    (absolute-url site address))))
+         (timestamp (getf metadata :timestamp)))
+    (spinneret:with-html-string
+      (when url
+        (:link :rel "canonical" :href url))
+      (:meta :property "og:type" :content (if timestamp "article" "website"))
+      (:meta :property "og:site_name" :content (site-title site))
+      (:meta :property "og:title" :content (document-title page site))
+      (:meta :property "og:description" :content description)
+      (when url
+        (:meta :property "og:url" :content url))
+      (when image
+        (:meta :property "og:image" :content image))
+      (when timestamp
+        (:meta :property "article:published_time"
+               :content (format-iso-date timestamp)))
+      (:meta :name "twitter:card"
+             :content (if image +card-with-image+ +card-without-image+)))))
+
 (defun feed-present-p (pages)
   "Return true when PAGES includes the generated feed.
 
@@ -155,6 +216,7 @@ MAIN: the HTML string placed inside the main element."
       (:meta :name "description"
              :content (or (getf (page-metadata page) :description)
                           (site-description site)))
+      (:raw (social-meta-html page site))
       (:link :rel "stylesheet" :href (site-link site +tokens-css-path+))
       (:link :rel "stylesheet" :href (site-link site +theme-css-path+))
       (when (feed-present-p pages)
