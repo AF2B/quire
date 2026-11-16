@@ -53,6 +53,10 @@
   :test #'string=
   :documentation "Stylesheet of the theme.")
 
+(define-constant +logo-wordmark+ "BORBA"
+  :test #'string=
+  :documentation "The author's logo: the name in capitals, then a blue period.")
+
 (define-constant +default-nav+ '(("Home" . "/"))
   :test #'equal
   :documentation "Navigation used when the site sets no :NAV.")
@@ -114,7 +118,8 @@ SITE: the site being built."
     (:header :class "site-header"
      (:div :class "wrap bar"
       (:a :class "logo" :href (site-link site "/")
-          (site-title site)
+          :aria-label (format nil "~A, home" +logo-wordmark+)
+          +logo-wordmark+
           (:span :class "dot" "."))
       (:nav :aria-label "Primary"
        (loop for (label . path) in (or (getf (site-extra site) :nav)

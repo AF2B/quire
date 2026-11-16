@@ -98,6 +98,12 @@ NAV: navigation entries as (LABEL . PATH) conses, or NIL for the default."
                       "<article" "<footer" "class=skip"))
       (is-true (search needle html) "~A should be in the page" needle))))
 
+(test header-logo-is-the-borba-wordmark-whatever-the-site-title
+  (let ((html (themed-page-html)))
+    (is-true (search "aria-label=\"BORBA, home\">BORBA<span" html))
+    (is-true (search "class=dot>.</span></a>" html))
+    (is-false (search "aria-label=\"Site" html))))
+
 (test navigation-marks-the-current-page
   (let ((html (themed-page-html :nav '(("Home" . "/") ("This" . "/x/")))))
     (is-true (search "aria-current=page>This" html))
