@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  executable:
+    name: Build the executable and attach it to the release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v5
+
+      - name: Install SBCL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sbcl curl
+
+      - name: Install Quicklisp
+        run: |
+          curl -fsSL https://beta.quicklisp.org/quicklisp.lisp -o /tmp/quicklisp.lisp
+          sbcl --noinform --non-interactive \
+            --load /tmp/quicklisp.lisp \
+            --eval '(quicklisp-quickstart:install)' \
+            --eval '(ql-util:without-prompting (ql:add-to-init-file))'
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Run the test suite
+        run: make test
+
+      - name: Build the executable
+        run: make binary
+
+      - name: Package the executable
+        run: |
+          name="quire-${GITHUB_REF_NAME}-linux-x86_64"
+          mkdir "$name"
+          cp bin/quire LICENSE NOTICE.md README.md "$name/"
+          tar -czf "$name.tar.gz" "$name"
+          sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
+          echo "ASSET=$name.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Create the release, or update it when it exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ASSET" "$ASSET.sha256" --clobber
+          else
+            prerelease=""
+            case "$GITHUB_REF_NAME" in v0.*) prerelease="--prerelease" ;; esac
+            gh release create "$GITHUB_REF_NAME" "$ASSET" "$ASSET.sha256" \
+              --verify-tag --generate-notes $prerelease
+          fi
