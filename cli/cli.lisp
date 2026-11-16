@@ -15,6 +15,9 @@
                 #:site-file-error)
   (:import-from #:quire/export
                 #:export-site)
+  (:import-from #:quire/markdown
+                #:call-with-render-cache
+                #:make-render-cache)
   (:import-from #:quire/server
                 #:server-port
                 #:start-server
@@ -222,7 +225,11 @@ ARGUMENTS: command line arguments after the command name."
                                  '("--site" "--port" "--host")
                                  '("--drafts")))
          (site (site-from-options options))
-         (server (start-server (lambda () (build-site site))
+         (cache (make-render-cache))
+         (server (start-server (lambda ()
+                                 (call-with-render-cache
+                                  cache
+                                  (lambda () (build-site site))))
                                :port (if (getf options :port)
                                          (parse-port (getf options :port))
                                          +default-port+)

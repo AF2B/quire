@@ -2,6 +2,9 @@
   (:use #:cl
         #:fiveam)
   (:import-from #:quire/markdown
+                #:*render-cache*
+                #:call-with-render-cache
+                #:make-render-cache
                 #:markdown->html)
   (:import-from #:quire/tests/suite
                 #:quire-suite))
@@ -49,3 +52,36 @@
 
 (test non-string-input-is-a-type-error
   (signals type-error (markdown->html nil)))
+
+(defun render-in-build (cache markdown)
+  "Render MARKDOWN as one whole build that uses CACHE."
+  (call-with-render-cache cache (lambda () (markdown->html markdown))))
+
+(test unchanged-sources-are-reused-between-builds
+  (let* ((cache (make-render-cache))
+         (first-html (render-in-build cache "# One"))
+         (second-html (render-in-build cache "# One")))
+    (is (eq first-html second-html))
+    (is (string= "<h1>One</h1>" (string-trim '(#\Newline) second-html)))))
+
+(test without-a-cache-every-call-renders-again
+  (is-false (eq (markdown->html "# One") (markdown->html "# One"))))
+
+(test sources-no-longer-used-are-dropped-after-a-build
+  (let* ((cache (make-render-cache))
+         (original (render-in-build cache "# Old")))
+    (render-in-build cache "# Other")
+    (render-in-build cache "# Other")
+    (let ((after-gap (render-in-build cache "# Old")))
+      (is (string= original after-gap))
+      (is-false (eq original after-gap)))))
+
+(test a-failed-build-keeps-the-last-good-entries
+  (let* ((cache (make-render-cache))
+         (original (render-in-build cache "# Keep")))
+    (ignore-errors
+     (call-with-render-cache cache (lambda () (error "boom"))))
+    (is (eq original (render-in-build cache "# Keep")))))
+
+(test the-cache-is-off-outside-a-build
+  (is (null *render-cache*)))
