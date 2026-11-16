@@ -177,19 +177,25 @@ NAV-PATH: the URL path of a navigation entry."
 
 PAGE: the page being rendered.
 SITE: the site being built."
-  (spinneret:with-html-string
-    (:header :class "site-header"
-     (:div :class "wrap bar"
-      (:a :class "logo" :href (site-link site "/")
-          :aria-label (format nil "~A, home" +logo-wordmark+)
-          +logo-wordmark+
-          (:span :class "dot" "."))
-      (:nav :aria-label "Primary"
-       (loop for (label . path) in (or (getf (site-extra site) :nav)
-                                       +default-nav+)
-             do (:a :href (site-link site path)
-                    :aria-current (when (current-p page path) "page")
-                    label)))))))
+  ;; The wordmark goes through variables: Spinneret inspects constants inside
+  ;; its body at macroexpansion time, and not every implementation has the
+  ;; value of a constant defined in the same file at that point.
+  (let ((wordmark +logo-wordmark+)
+        (logo-label (format nil "~A, home" +logo-wordmark+))
+        (default-nav +default-nav+))
+    (spinneret:with-html-string
+      (:header :class "site-header"
+       (:div :class "wrap bar"
+        (:a :class "logo" :href (site-link site "/")
+            :aria-label logo-label
+            wordmark
+            (:span :class "dot" "."))
+        (:nav :aria-label "Primary"
+         (loop for (label . path) in (or (getf (site-extra site) :nav)
+                                         default-nav)
+               do (:a :href (site-link site path)
+                      :aria-current (when (current-p page path) "page")
+                      label))))))))
 
 (defun footer-html (site)
   "Return the HTML of the site footer.
