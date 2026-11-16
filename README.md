@@ -21,6 +21,8 @@ server: redefine a layout and the browser reloads.
 - Tags, section listings, RSS and Atom feeds and a sitemap out of the box
 - Canonical link and Open Graph tags for shared links
 - `quire check` finds broken internal links, for CI
+- Several languages with translation links and a language switcher
+- Series, tables of contents, footnotes, reading time and collapsible sections
 - Deterministic output: same content in, same bytes out
 - Dev server with live reload (server-sent events), rebuilds on file changes
 - Single executable: `quire build`, `quire serve`, about 5 ms to start
@@ -247,5 +249,5 @@ FiveAM and usocket (tests only).
   `.nojekyll` and `.well-known/`.
 - The watcher polls; it does not use inotify. Very large content trees will
   make each poll slower.
-- No image pipeline yet; i18n is a `:lang` per page, with no translation links.
+- No image pipeline yet.
 - One-shot builds are not incremental; the dev server reuses unchanged Markdown.

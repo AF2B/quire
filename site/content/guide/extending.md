@@ -11,31 +11,29 @@ sitemap and the layouts are all steps, and so is anything you add.
 
 A step receives the page map and the site, and returns a page map. It may add
 pages, replace pages or leave them alone. It never modifies the map it
-receives. This one estimates the reading time of every dated page:
+receives. This one counts the words of every dated page:
 
 ```lisp
-(defconstant +words-per-minute+ 200
-  "Reading speed used to estimate the reading time.")
+(defun word-count (page)
+  "Return the number of words in the body of PAGE."
+  (1+ (count #\Space (page-body page))))
 
-(defun reading-minutes (page)
-  "Return the minutes PAGE takes to read, at least one."
-  (max 1 (ceiling (1+ (count #\Space (page-body page))) +words-per-minute+)))
-
-(defun add-reading-time (page-map site)
-  "Return PAGE-MAP with :READING-MINUTES in the metadata of every dated page."
+(defun add-word-count (page-map site)
+  "Return PAGE-MAP with :WORD-COUNT in the metadata of every dated page."
   (declare (ignore site))
   (let ((result (make-page-map)))
     (dolist (page (page-map-pages page-map) result)
       (add-page result
                 (if (getf (page-metadata page) :timestamp)
                     (copy-page page
-                               :metadata (list* :reading-minutes
-                                                (reading-minutes page)
+                               :metadata (list* :word-count
+                                                (word-count page)
                                                 (page-metadata page)))
                     page)))))
 ```
 
-A layout can then read `(getf (page-metadata page) :reading-minutes)`.
+A layout can then read `(getf (page-metadata page) :word-count)`. The default
+steps already set `:reading-minutes` this way, so you rarely need your own.
 
 ## Registering it
 
@@ -47,7 +45,7 @@ last because it wraps every page in its layout:
   (make-site :title "My site"
              :layouts (quire/theme-borba:layouts)
              :steps (append (butlast steps)
-                            '(add-reading-time)
+                            '(add-word-count)
                             (last steps))))
 ```
 

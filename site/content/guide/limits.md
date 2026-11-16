@@ -19,8 +19,11 @@ quire is at `0.1.0`, a public preview. The API may change before 1.0.
   each poll slower.
 - Every build reads and renders the whole site; the dev server reuses the
   rendered Markdown of unchanged files, but a one-shot build does not.
-- No image pipeline yet, and i18n is limited to a `:lang` per page: there are
-  no translation links between pages.
+- No image pipeline yet.
+- Translations are matched by path. There is no way to link two pages whose
+  paths differ, and the theme's interface strings cover five languages only.
+- A series cannot be announced before its first part is published.
+- Footnotes are one line each, and containers do not nest.
 - Extensions are build steps; there is no separate plugin system.
 
 Found a problem? Open an issue on

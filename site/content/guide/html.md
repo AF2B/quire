@@ -49,4 +49,4 @@ Electric Blue accents, Inter, JetBrains Mono and Playfair Display, square
 corners and 1 px borders. The generator itself does not depend on the theme;
 write your own layouts and the theme is not loaded.
 
-Next: [REPL workflow](../repl/).
+Next: [the Borba theme](../theme/).

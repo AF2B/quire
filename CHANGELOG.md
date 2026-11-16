@@ -26,6 +26,24 @@ Until 1.0.0 the public API may change between minor versions.
 - Product site and guide in `site/`, built entirely with quire and published
   to GitHub Pages by a workflow.
 - The default theme shows the BORBA wordmark as the header logo.
+- Languages: `:languages` on the site, content in `content/<code>/`, the step
+  `add-translations`, `hreflang` links, a language dropdown with flags in the
+  theme, and section listings, tags, series and feeds per language.
+- Series: the `:series`, `:part` and `:series-total` front matter keys and the
+  step `add-series`, with navigation between parts and a page per series.
+- `h2` and `h3` get ids and a `:toc`, and every page gets `:reading-minutes`.
+- Markdown containers (`::: details Title`) and footnotes (`[^id]`).
+- `page-source-name`, so a theme can link to the Markdown source of a page.
+- Theme layouts `:about`, `:contact`, `:series` and `:series-index`, an
+  editorial `:home`, a footer with social links, interface strings in five
+  languages, and a table of contents in posts.
+- `examples/blog`, a multilingual blog that uses all of the above.
+
+### Changed
+
+- Section listings and tag pages in the theme are rows with tags and reading
+  time instead of plain entries. Navigation labels may be keywords that the
+  theme translates. `tag-url-path` takes an optional language prefix.
 
 ### Fixed
 
