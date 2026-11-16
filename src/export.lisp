@@ -122,6 +122,8 @@ CLEAN: true to delete the previous contents first."
                                                   :if-exists :supersede
                                                   :external-format :utf-8)
         (write-string +output-marker-text+ out)))
-    (let ((written (loop for page in (page-map-pages page-map)
-                         collect (write-page root page))))
-      (values (sort written #'string<) (length written)))))
+    (let ((written (sort (loop for page in (page-map-pages page-map)
+                               collect (write-page root page))
+                         #'string<)))
+      ;; SORT is destructive: only its result is a valid list afterwards.
+      (values written (length written)))))
