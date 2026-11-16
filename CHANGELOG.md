@@ -8,6 +8,12 @@ Until 1.0.0 the public API may change between minor versions.
 
 ## [Unreleased]
 
+### Added
+
+- Product site and guide in `site/`, built entirely with quire and published
+  to GitHub Pages by a workflow.
+- The default theme shows the BORBA wordmark as the header logo.
+
 ## [0.1.0] - 2026-11-15
 
 First public preview.

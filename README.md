@@ -3,6 +3,8 @@
 **Pages are functions. Sites are data.**
 
 [![CI](https://github.com/AF2B/quire/actions/workflows/ci.yml/badge.svg)](https://github.com/AF2B/quire/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-af2b.github.io%2Fquire-0074D9)](https://af2b.github.io/quire/)
+[![Pages](https://github.com/AF2B/quire/actions/workflows/pages.yml/badge.svg)](https://github.com/AF2B/quire/actions/workflows/pages.yml)
 [![Release](https://img.shields.io/github/v/release/AF2B/quire?include_prereleases&label=release&color=0074D9)](https://github.com/AF2B/quire/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0074D9)](LICENSE)
 [![Common Lisp](https://img.shields.io/badge/Common%20Lisp-SBCL-0074D9)](https://www.sbcl.org/)
@@ -26,6 +28,10 @@ server: redefine a layout and the browser reloads.
 Status: `0.1.0`, a public preview: the API may still change before 1.0.
 SBCL only. License: MIT (see `LICENSE`); the bundled fonts are under the SIL
 Open Font License (see `NOTICE.md`). Changes are listed in `CHANGELOG.md`.
+
+Documentation: **<https://af2b.github.io/quire/>**. That site, guide included,
+is built entirely with quire (the source is in `site/`). The screenshots below
+show the demo site in `examples/demo/`.
 
 ![The demo site: home page](docs/screenshot-home.jpg)
 
@@ -207,7 +213,9 @@ make sync-design   # re-copy tokens.css and fonts from ~/Documents/borba-design-
 
 Every push and pull request runs the strict build, the suite, builds the
 executable and builds the demo site twice to check that the output is identical
-(see `.github/workflows/ci.yml`).
+(see `.github/workflows/ci.yml`). Every push to `main` also builds the product
+site in `site/` with quire and publishes it to GitHub Pages (see
+`.github/workflows/pages.yml`).
 
 Systems: `quire` (core), `quire/theme-borba`, `quire/server`, `quire/cli`,
 `quire/tests`. One package per file, exported symbols only.
