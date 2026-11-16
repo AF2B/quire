@@ -32,6 +32,8 @@
                   "/feed.xml"
                   "/a/b.html"
                   "/.nojekyll"
+                  "/CNAME"
+                  "/LICENSE"
                   "/olá/"))
     (is (string= path (parse-path path))
         "~S should be valid" path)))
@@ -46,7 +48,8 @@
 (test file-path-without-extension-is-rejected
   (is (eq :missing-extension (reason-of "/blog")))
   (is (eq :missing-extension (reason-of "/a/b")))
-  (is (eq :missing-extension (reason-of "/a."))))
+  (is (eq :missing-extension (reason-of "/a.")))
+  (is (eq :missing-extension (reason-of "/cname"))))
 
 (test empty-and-dot-segments-are-rejected
   (is (eq :bad-segment (reason-of "/a//b/")))

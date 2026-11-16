@@ -1,5 +1,7 @@
 (defpackage #:quire/files
   (:use #:cl)
+  (:import-from #:alexandria
+                #:define-constant)
   (:export #:read-file-octets
            #:read-file-text
            #:walk-files))
@@ -8,6 +10,11 @@
 
 (defconstant +hidden-prefix+ #\.
   "Files and directories whose name starts with this character are ignored.")
+
+(define-constant +exposed-hidden-names+ '(".well-known" ".nojekyll")
+  :test #'equal
+  :documentation "Hidden names that are still part of a site: the standard
+location for site metadata files and the marker that disables Jekyll.")
 
 (defun read-file-text (pathname)
   "Return the contents of PATHNAME as a UTF-8 string.
@@ -26,7 +33,10 @@ PATHNAME: the file to read."
       octets)))
 
 (defun hidden-p (pathname)
-  "Return true when PATHNAME names a file or directory that starts with a dot.
+  "Return true when PATHNAME names a hidden file or directory to ignore.
+
+A name that starts with a dot is hidden, except the names in
++EXPOSED-HIDDEN-NAMES+.
 
 PATHNAME: a file or directory pathname."
   (let ((name (if (uiop:directory-pathname-p pathname)
@@ -34,12 +44,14 @@ PATHNAME: a file or directory pathname."
                   (file-namestring pathname))))
     (and (stringp name)
          (plusp (length name))
-         (char= +hidden-prefix+ (char name 0)))))
+         (char= +hidden-prefix+ (char name 0))
+         (not (member name +exposed-hidden-names+ :test #'string=)))))
 
 (defun walk-files (directory)
   "Return every visible file under DIRECTORY as (RELATIVE-NAME . PATHNAME).
 
-RELATIVE-NAME uses forward slashes. Hidden files and directories are skipped.
+RELATIVE-NAME uses forward slashes. Hidden files and directories are skipped,
+except .well-known and .nojekyll.
 The list is sorted by RELATIVE-NAME, so the traversal is deterministic. A
 missing DIRECTORY yields NIL.
 

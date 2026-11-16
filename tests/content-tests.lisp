@@ -119,9 +119,21 @@
     (write-text-file root "content/a.md" "x")
     (is (= 1 (page-map-count (read-content (site-in root)))))))
 
+(test well-known-extensionless-and-hidden-files-are-copied
+  (with-temp-directory (root)
+    (write-text-file root "static/CNAME" "example.com")
+    (write-text-file root "static/.nojekyll" "")
+    (write-text-file root "static/.well-known/security.txt" "Contact: x")
+    (write-text-file root "static/.git/config.txt" "x")
+    (let ((page-map (read-static-directory
+                     (merge-pathnames "static/" root))))
+      (is (equal '("/.nojekyll" "/.well-known/security.txt" "/CNAME")
+                 (sort (mapcar #'page-path (page-map-pages page-map))
+                       #'string<))))))
+
 (test files-with-invalid-site-paths-are-skipped-with-a-warning
   (with-temp-directory (root)
-    (write-text-file root "content/CNAME" "example.com")
+    (write-text-file root "content/NOTES" "no extension")
     (write-text-file root "content/a.md" "x")
     (let ((skipped 0))
       (handler-bind ((skipped-file (lambda (condition)

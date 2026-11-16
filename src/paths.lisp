@@ -22,6 +22,12 @@
   :test #'string=
   :documentation "File written for a directory path.")
 
+(define-constant +extensionless-file-names+ '("CNAME" "LICENSE")
+  :test #'equal
+  :documentation "Well-known file names that are valid file paths without an
+extension. Any other name without an extension is ambiguous with a directory
+and is rejected.")
+
 (define-constant +current-segment+ "."
   :test #'string=
   :documentation "Path segment that means the current directory.")
@@ -109,7 +115,10 @@ PATH: a string."
            (cond ((some #'bad-segment-p segments)
                   :bad-segment)
                  ((and (not (path-directory-p path))
-                       (not (has-extension-p (first (last segments)))))
+                       (not (has-extension-p (first (last segments))))
+                       (not (member (first (last segments))
+                                    +extensionless-file-names+
+                                    :test #'string=)))
                   :missing-extension))))))
 
 (defun parse-path (path)
@@ -117,7 +126,8 @@ PATH: a string."
 
 A valid path starts with a slash, has no empty, \".\" or \"..\" segments and no
 control character, ?, # or backslash. It either ends with a slash (a directory)
-or ends with a file name that has an extension.
+or ends with a file name that has an extension, or with one of the well-known
+names in +EXTENSIONLESS-FILE-NAMES+ (CNAME, LICENSE).
 
 Restart USE-VALUE takes a replacement string, which is validated in turn.
 
