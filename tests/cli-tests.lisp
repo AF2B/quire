@@ -145,3 +145,24 @@
       (is-true (contains-p "Refusing to clean" err))
       (is (string= "keep" (read-file-text
                            (merge-pathnames "out/precious.txt" root)))))))
+
+(test check-reports-no-broken-links-for-a-healthy-site
+  (with-temp-directory (root)
+    (write-site root)
+    (multiple-value-bind (code out err)
+        (run-captured "check" "--site"
+                      (uiop:native-namestring (merge-pathnames "site.lisp" root)))
+      (is (= 0 code) "stderr: ~A" err)
+      (is-true (contains-p "No broken links." out)))))
+
+(test check-exits-with-failure-and-lists-each-broken-link
+  (with-temp-directory (root)
+    (write-site root)
+    (write-text-file root "content/about.md"
+                     (format nil "---~%(:title \"About\")~%---~%<a href=\"/nope/\">x</a>"))
+    (multiple-value-bind (code out)
+        (run-captured "check" "--site"
+                      (uiop:native-namestring (merge-pathnames "site.lisp" root)))
+      (is (= 1 code))
+      (is-true (contains-p "/about/: /nope/ (no such page)" out))
+      (is-true (contains-p "1 broken link." out)))))

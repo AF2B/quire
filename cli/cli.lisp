@@ -4,6 +4,11 @@
                 #:define-constant)
   (:import-from #:quire/build
                 #:build-site)
+  (:import-from #:quire/check
+                #:broken-link-href
+                #:broken-link-page
+                #:broken-link-reason
+                #:check-links)
   (:import-from #:quire/conditions
                 #:cli-usage-error
                 #:quire-error
@@ -31,7 +36,8 @@
   "Exit code of a command that succeeded.")
 
 (defconstant +exit-failure+ 1
-  "Exit code of a command that failed with a quire error.")
+  "Exit code of a command that failed with a quire error, or of a check that
+found broken links.")
 
 (defconstant +exit-usage+ 2
   "Exit code of a command line that was not understood.")
@@ -68,6 +74,7 @@
 
 Commands:
   build    Build the site into a directory.
+  check    Build the site and report links that lead nowhere.
   serve    Serve the site with live reload.
   version  Print the version.
   help     Print this message.
@@ -178,6 +185,35 @@ ARGUMENTS: command line arguments after the command name."
       (format t "Built ~D files into ~A~%" count (uiop:native-namestring output))
       +exit-ok+)))
 
+(defun describe-broken-link (broken)
+  "Return the one-line report of a broken link.
+
+BROKEN: a BROKEN-LINK."
+  (format nil "~A: ~A (~A)"
+          (broken-link-page broken)
+          (broken-link-href broken)
+          (ecase (broken-link-reason broken)
+            (:missing-page "no such page")
+            (:outside-base-path "outside the base URL path"))))
+
+(defun command-check (arguments)
+  "Build the site, report its broken links and return the exit code.
+
+The exit code is 0 when every internal link works and 1 otherwise.
+
+ARGUMENTS: command line arguments after the command name."
+  (let* ((options (parse-options arguments '("--site") '("--drafts")))
+         (site (site-from-options options))
+         (broken (check-links (build-site site) site)))
+    (dolist (link broken)
+      (format t "~A~%" (describe-broken-link link)))
+    (cond (broken
+           (format t "~D broken link~:P.~%" (length broken))
+           +exit-failure+)
+          (t
+           (format t "No broken links.~%")
+           +exit-ok+))))
+
 (defun command-serve (arguments)
   "Serve the site with live reload until interrupted and return the exit code.
 
@@ -220,6 +256,7 @@ ARGUMENTS: list of strings, the command line without the program name."
                (format t "quire ~A~%" *version*)
                +exit-ok+)
               ((string= command "build") (command-build rest))
+              ((string= command "check") (command-check rest))
               ((string= command "serve") (command-serve rest))
               (t (usage-error "Unknown command ~S." command))))
     (cli-usage-error (condition)
